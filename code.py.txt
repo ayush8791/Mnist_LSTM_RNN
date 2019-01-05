@@ -1,0 +1,23 @@
+import tensorflow as tf
+from tensorflow.keras.layers import Dense , CuDNNLSTM ,Dropout
+from tensorflow.keras.models import Sequential
+
+(X_train,y_train),(X_test,y_tes)=tf.keras.datasets.mnist.load_data()
+X_train=X_train/255.0
+X_test=X_test/255.0
+
+model=Sequential()
+model.add(CuDNNLSTM(128 , input_shape=(X_train.shape[1:]),return_sequences=True))
+model.add(Dropout(0.2))
+model.add(CuDNNLSTM(128))
+model.add(Dropout(0.2))
+model.add(Dense(32,activation='relu'))
+model.add(Dropout(0.2))
+model.add(Dense(10,activation='softmax'))
+opt=tf.keras.optimizers.Adam(lr=1e-3,decay=1e-5)
+model.compile(loss='sparse_categorical_crossentropy',
+             optimizer=opt ,
+             metrics=['accuracy'])
+model.fit(X_train,y_train,epochs=3,validation_data=(X_test,y_tes))
+
+model.save("msnit.h5")
